@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% for message in get_flashed_messages() %}
+	
+	<div class="alert alert-warning alert-dismissible fade show" role="alert">
+	  {{ message }}
+	  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+	</div>
+
+	
+{% endfor %}
+
+
+{% if name %}
+	<h1>WELCOME {{ name|upper }}!!</h1>
+	<br/>
+	<img src="{{ url_for('static', filename='images/solo_levelling.jpg')}}" width=1100>
+	<br/><br/>
+
+<script src="{{ url_for('static', filename='js/myfile.js')}}"></script>
+
+
+{% else %}
+	<h1>What's Your Name?</h1>
+	<br/>
+
+	<div class="shadow p-3 mb-5 bg-body-tertiary rounded">
+	<form method="POST">
+		{{ form.hidden_tag() }}
+
+		{{ form.name.label(class="form-label") }}
+
+		{{ form.name(class="form-control") }}
+		<br/>
+		
+		{{ form.submit(class="btn btn-primary") }}
+
+
+	</form>
+</div>
+
+
+{% endif %}
+
+{% endblock %}
