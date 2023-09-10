@@ -4,8 +4,8 @@
 
 {% for message in get_flashed_messages() %}
 	<div class="alert alert-warning alert-dismissible fade show" role="alert">
-	  {{ message }}
-	  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		{{ message }}
+		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 	</div>
 {% endfor %}
 
@@ -21,7 +21,7 @@
 		{{ form.title(class="form-control") }}
 		<br/>
 
-		 
+
 		{{ form.slug.label(class="form-label") }}
 
 		{{ form.slug(class="form-control") }}
@@ -38,12 +38,14 @@
 
 	</form>
 	{{ ckeditor.load() }}
- 	{{ ckeditor.config(name='content') }}
+	{{ ckeditor.config(name='content') }}
 
-	
+</br>
+
+	<a href="{{ url_for('posts')}}" class="btn btn-outline-primary btn-sm">Back To Blog</a>
+
 </div>
 
-<a href="{{ url_for('posts')}}" class="btn btn-outline-primary btn-sm">Back To Blog</a>
 
 
 

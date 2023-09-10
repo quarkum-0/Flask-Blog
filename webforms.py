@@ -33,7 +33,6 @@ class UserForm(FlaskForm):
 	name = StringField("Name", validators=[DataRequired()])
 	username = StringField("Username", validators=[DataRequired()])
 	email = StringField("Email", validators=[DataRequired()])
-	favorite_color = StringField("Favorite Color")
 	about_author = TextAreaField("About Author")
 	password_hash = PasswordField('Password', validators=[DataRequired(), EqualTo('password_hash2', message='Passwords Must Match!')])
 	password_hash2 = PasswordField('Confirm Password', validators=[DataRequired()])
