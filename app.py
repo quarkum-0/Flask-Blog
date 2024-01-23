@@ -51,8 +51,8 @@ login_manager.login_view = 'login'
 
 
 appConf = {
-    "OAUTH2_CLIENT_ID": "Google_Client_Id",
-    "OAUTH2_CLIENT_SECRET": "Google_Client_Secret",
+    "OAUTH2_CLIENT_ID": "450733642939-pcbtv5ru2p74gjd4tddmkd9hg1e1c0pc.apps.googleusercontent.com",
+    "OAUTH2_CLIENT_SECRET": "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",
     "OAUTH2_META_URL": "https://accounts.google.com/.well-known/openid-configuration",
     "FLASK_SECRET": "ALongRandomlyGeneratedString",
     "FLASK_PORT": 5000
@@ -64,8 +64,8 @@ oauth = OAuth(app)
 # list of google scopes - https://developers.google.com/identity/protocols/oauth2/scopes
 oauth.register(
     "myApp",
-    client_id=appConf.get("OAUTH2_CLIENT_ID"),
-    client_secret=appConf.get("OAUTH2_CLIENT_SECRET"),
+    client_id=appConf.get("450733642939-pcbtv5ru2p74gjd4tddmkd9hg1e1c0pc.apps.googleusercontent.com"),
+    client_secret=appConf.get("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"),
     client_kwargs={
         "scope": "openid profile email https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/user.gender.read",
     },
@@ -207,9 +207,53 @@ def dashboard_google():
 		google_email = user_info.get('personData', {}).get('userinfo', {}).get('email', {})
 		google_name = user_info.get('personData', {}).get('userinfo', {}).get('give_name', {})
 
-		user = Users(name=google_name, email=google_email)
-		db.session.add('add_google_user')
-		db.session.commit()
+		form = UserForm()
+	id = current_user.id
+	name_to_update = Users.query.get_or_404(id)
+	if request.method == "POST":
+		name_to_update.name = request.form['name']
+		name_to_update.email = request.form['email']
+		name_to_update.username = request.form['username']
+		name_to_update.about_author = request.form['about_author']
+		
+
+		# Check for profile pic
+		if request.files['profile_pic']:
+			name_to_update.profile_pic = request.files['profile_pic']
+
+			# Grab Image Name
+			pic_filename = secure_filename(name_to_update.profile_pic.filename)
+			# Set UUID
+			pic_name = str(uuid.uuid1()) + "_" + pic_filename
+			# Save That Image
+			saver = request.files['profile_pic']
+			
+
+			# Change it to a string to save to db
+			name_to_update.profile_pic = pic_name
+			try:
+				db.session.commit()
+				saver.save(os.path.join(app.config['UPLOAD_FOLDER'], pic_name))
+				flash("User Updated Successfully!")
+				return render_template("google_dashboard.html", 
+					form=form,
+					name_to_update = name_to_update)
+			except:
+				flash("Error!  Looks like there was a problem...try again!")
+				return render_template("google_dashboard.html", 
+					form=form,
+					name_to_update = name_to_update)
+		else:
+			db.session.commit()
+			flash("User Updated Successfully!")
+			return render_template("google_dashboard.html", 
+				form=form, 
+				name_to_update = name_to_update)
+	else:
+		return render_template("google_dashboard.html", 
+				form=form,
+				name_to_update = name_to_update,
+				id = id)
 
 		# Log in the user (You might have your own session management logic)
 		# For example, you can store the user's ID in the session:
@@ -292,7 +336,11 @@ def add_google_user():
 		user = Users(name=session.get('user_name'))
 		db.session.add(user)
 		db.session.commit()
-	name = session.get('user_name')
+	name = form.name.data
+	form.name.data = session.get('give_name')
+	form.username.data = ''
+	form.email.data = 'email'
+	form.password_hash.data = ''
 
 	flash("User Added Successfully!")
 	our_users = Users.query.order_by(Users.date_added)
@@ -336,6 +384,12 @@ def delete_post(id):
 
 @app.route('/posts')
 def posts():
+	# Grab all the posts from the database
+	posts = Posts.query.order_by(Posts.date_posted)
+	return render_template("posts.html", posts=posts)
+
+@app.route('/liked')
+def liked():
 	# Grab all the posts from the database
 	posts = Posts.query.order_by(Posts.date_posted)
 	return render_template("posts.html", posts=posts)
